@@ -9,12 +9,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Get project files
-!wget https://cdn.freecodecamp.org/project-data/cats-and-dogs/cats_and_dogs.zip
+PATH = 'path/to/your/folder'
 
-!unzip cats_and_dogs.zip
-
-PATH = 'cats_and_dogs'
-
+# jpegs should be split into three folders (training, validation, test)
 train_dir = os.path.join(PATH, 'train')
 validation_dir = os.path.join(PATH, 'validation')
 test_dir = os.path.join(PATH, 'test')
@@ -27,14 +24,14 @@ total_test = len(os.listdir(test_dir))
 
 # Variables for pre-processing and training.
 batch_size = 128
-epochs = 15
+epochs = 100
 IMG_HEIGHT = 150
 IMG_WIDTH = 150
 
 # 3
-train_image_generator = ImageDataGenerator(rescale=1./255)
-validation_image_generator = ImageDataGenerator(rescale=1./255)
-test_image_generator = ImageDataGenerator(rescale=1./255)
+train_image_generator = ImageDataGenerator(rescale=1./255) # grayscale the images
+validation_image_generator = ImageDataGenerator(rescale=1./255) # grayscale the images
+test_image_generator = ImageDataGenerator(rescale=1./255) # grayscale the images
 
 train_data_gen = train_image_generator.flow_from_directory(
     train_dir,
@@ -95,7 +92,7 @@ train_data_gen = train_image_generator.flow_from_directory(
     train_dir,
     target_size=(IMG_HEIGHT, IMG_WIDTH),
     batch_size=batch_size,
-    class_mode='categorical'  # Change this to your specific problem
+    class_mode='categorical'
 )
 
 # 6
@@ -115,7 +112,7 @@ train_data_gen.labels
 model = Sequential()
 num_classes = 2
 # Number of epochs for training
-epochs = 50
+epochs = 100
 steps_per_epoch = train_data_gen.n // batch_size
 validation_steps = val_data_gen.n // batch_size
 
@@ -178,8 +175,6 @@ model.add(Dense(best_params['neurons'], activation='relu'))
 model.add(Dense(num_classes, activation='softmax'))
 
 # 8
-epochs = 50
-
 # Compile the model
 optimizer = Adam(learning_rate=best_params['learning_rate'])
 model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
@@ -220,27 +215,3 @@ predicted_probabilities = model.predict(test_data_gen)
 
 # Print the predicted probabilities
 print(predicted_probabilities)
-
-# 11
-answers =  [1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0,
-            1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0,
-            1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1,
-            1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1,
-            0, 0, 0, 0, 0, 0]
-
-correct = 0
-
-for probability, answer in zip(probabilities, answers):
-  if round(probability) == answer:
-    correct +=1
-
-percentage_identified = (correct / len(answers)) * 100
-
-passed_challenge = percentage_identified >= 63
-
-print(f"Your model correctly identified {round(percentage_identified, 2)}% of the images of cats and dogs.")
-
-if passed_challenge:
-  print("You passed the challenge!")
-else:
-  print("You haven't passed yet. Your model should identify at least 63% of the images. Keep trying. You will get it!")
